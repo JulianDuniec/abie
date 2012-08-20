@@ -4,8 +4,133 @@
 
   abie = require('../lib/abie');
 
-  exports.test = function(test) {
-    test.equal(abie.number, 1);
+  exports.abTestOneOption = function(test) {
+    var optionA, res;
+    optionA = "optionA";
+    res = abie.test("TestName", [
+      {
+        name: optionA
+      }
+    ]);
+    test.equal(res, optionA);
+    return test.done();
+  };
+
+  exports.abTestTwoOptions = function(test) {
+    var aCount, bCount, error, halfTestCount, i, limitHigh, limitLow, optionA, optionB, res, testCount, _i;
+    optionA = "optionA";
+    optionB = "optionB";
+    aCount = 0;
+    bCount = 0;
+    testCount = 10000;
+    halfTestCount = testCount / 2;
+    error = 0.02 * testCount;
+    limitLow = halfTestCount - error;
+    limitHigh = halfTestCount + error;
+    for (i = _i = 1; 1 <= testCount ? _i <= testCount : _i >= testCount; i = 1 <= testCount ? ++_i : --_i) {
+      res = abie.test("Name", [
+        {
+          name: optionA
+        }, {
+          name: optionB
+        }
+      ]);
+      if (res === optionA) {
+        ++aCount;
+      } else {
+        ++bCount;
+      }
+    }
+    test.ok(aCount > limitLow, "Acount too low " + aCount);
+    test.ok(aCount < limitHigh, "Acount too high " + aCount);
+    test.ok(bCount > limitLow, "Bcount too low " + bCount);
+    test.ok(bCount < limitHigh, "Bcount too high " + bCount);
+    return test.done();
+  };
+
+  exports.abTestDuration = function(test) {
+    var endDate, i, optionA, optionB, res, startDate, testCount, _i;
+    optionA = "optionA";
+    optionB = "optionB";
+    startDate = Date.now() - 100;
+    endDate = Date.now() - 50;
+    testCount = 1000;
+    for (i = _i = 1; 1 <= testCount ? _i <= testCount : _i >= testCount; i = 1 <= testCount ? ++_i : --_i) {
+      res = abie.test("Name", [
+        {
+          name: optionA
+        }, {
+          name: optionB
+        }
+      ], {
+        startDate: startDate,
+        endDate: endDate
+      });
+      test.equal(res, optionA);
+    }
+    return test.done();
+  };
+
+  exports.abTestActive = function(test) {
+    var aCount, bCount, endDate, error, halfTestCount, i, limitHigh, limitLow, optionA, optionB, res, startDate, testCount, _i;
+    optionA = "optionA";
+    optionB = "optionB";
+    aCount = 0;
+    bCount = 0;
+    testCount = 10000;
+    halfTestCount = testCount / 2;
+    error = 0.02 * testCount;
+    limitLow = halfTestCount - error;
+    limitHigh = halfTestCount + error;
+    startDate = new Date().setDate(new Date().getDate() - 1);
+    endDate = new Date().setDate(new Date().getDate() + 1);
+    for (i = _i = 1; 1 <= testCount ? _i <= testCount : _i >= testCount; i = 1 <= testCount ? ++_i : --_i) {
+      res = abie.test("Name", [
+        {
+          name: optionA
+        }, {
+          name: optionB
+        }
+      ], {
+        startDate: startDate,
+        endDate: endDate
+      });
+      if (res === optionA) {
+        ++aCount;
+      } else {
+        ++bCount;
+      }
+    }
+    test.ok(aCount > limitLow, "Acount too low " + aCount);
+    test.ok(aCount < limitHigh, "Acount too high " + aCount);
+    test.ok(bCount > limitLow, "Bcount too low " + bCount);
+    test.ok(bCount < limitHigh, "Bcount too high " + bCount);
+    return test.done();
+  };
+
+  exports.abTestPopulation = function(test) {
+    var cases, i, optionA, optionB, options, population, res, testName, _i, _j;
+    optionA = "optionA";
+    optionB = "optionB";
+    testName = "TestName";
+    population = 10000;
+    cases = [
+      {
+        name: optionA
+      }, {
+        name: optionB
+      }
+    ];
+    options = {
+      population: population
+    };
+    for (i = _i = 1; 1 <= population ? _i <= population : _i >= population; i = 1 <= population ? ++_i : --_i) {
+      abie.test(testName, cases, options);
+    }
+    for (i = _j = 1; 1 <= population ? _j <= population : _j >= population; i = 1 <= population ? ++_j : --_j) {
+      res = abie.test(testName, cases, options);
+      test.equal(res, optionA);
+    }
     return test.done();
   };
 
