@@ -12,6 +12,7 @@ exports.abTestOneOption = (test) ->
 exports.abTestTwoOptions = (test) ->
 	optionA = "optionA" 
 	optionB = "optionB"
+	testName = Math.random()
 	aCount = 0
 	bCount = 0
 	testCount = 10000
@@ -20,9 +21,9 @@ exports.abTestTwoOptions = (test) ->
 	error = (0.02 * testCount)
 	limitLow = halfTestCount - error
 	limitHigh = halfTestCount + error
-
+	cases = [{name : optionA}, {name: optionB}]
 	for i in [1..testCount]
-		res = abie.test("Name", [{name : optionA}, {name: optionB}])
+		res = abie.test testName, cases
 		if res == optionA
 			++aCount
 		else
@@ -38,20 +39,20 @@ exports.abTestTwoOptions = (test) ->
 exports.abTestDuration = (test) ->
 	optionA = "optionA"
 	optionB = "optionB"
+	testName = Math.random()
+
 	startDate = Date.now() - 100
 	endDate = Date.now() - 50
 	testCount = 1000 
-	for i in [1..testCount]
-		res = abie.test(
-			"Name", 
-			[
+	cases = [
 				{name : optionA}, 
-				{name : optionB}], 
-			{
+				{name : optionB}]
+	options = {
 				startDate : startDate, 
 				endDate : endDate
-			}
-		)
+	}
+	for i in [1..testCount]
+		res = abie.test testName, cases, options
 		test.equal(res, optionA)
 	test.done()
 
@@ -70,17 +71,17 @@ exports.abTestActive = (test) ->
 	error = (0.02 * testCount)
 	limitLow = halfTestCount - error
 	limitHigh = halfTestCount + error
-
 	startDate = new Date().setDate(new Date().getDate()-1)
 	endDate = new Date().setDate(new Date().getDate()+1)
-	for i in [1..testCount]
-		res = abie.test(
-			testName, 
-			[{name : optionA}, {name: optionB}], 
-			{
+
+	cases = [{name : optionA}, {name: optionB}]
+	options = {
 				startDate : startDate,
 				endDate : endDate
-			})
+	}
+	
+	for i in [1..testCount]
+		res = abie.test testName, cases, options
 		if res == optionA
 			++aCount
 		else
@@ -97,7 +98,7 @@ exports.abTestActive = (test) ->
 exports.abTestPopulation = (test) ->
 	optionA = "optionA"
 	optionB = "optionB"
-	testName = "TestName"
+	testName = Math.random()
 	population = 10000
 	cases = [{name : optionA}, {name: optionB}]
 	options = {population : population}
@@ -110,5 +111,45 @@ exports.abTestPopulation = (test) ->
 	for i in [1..population]
 		res = abie.test(testName, cases, options)
 		test.equal res, optionA
+
+	test.done()
+
+#Ensures that the result of a test is sticky to the 
+#supplied user
+exports.abStickyness = (test) ->
+	optionA = "OptionA"
+	optionB = "OptionB"
+	testName = Math.random()
+	cases = [{name : optionA}, {name: optionB}]
+	
+	for i in [1..100]
+		options = {user : i}
+		res = abie.test testName, cases, options
+		for j in [1..100]
+			followUp = abie.test testName, cases, options 
+			test.equal followUp, res
+
+	test.done()
+
+# Ensures that stickiness is unique to test-name, not global
+exports.abStickynessMultiple = (test) ->
+	optionA = "OptionA"
+	optionB = "OptionB"
+	optionA1 = "OptionA1"
+	optionB2 = "OptionB2"
+	testNameA = Math.random()
+	testNameB = Math.random()
+	casesA = [{name : optionA}, {name: optionB}]
+	casesB = [{name : optionA1}, {name: optionB2}]
+	
+	for i in [1..100]
+		options = {user : i}
+		abie.test testNameA, casesA, options
+
+	for i in [1..100]
+		options = {user : i}
+		res = abie.test testNameB, casesB, options
+		test.notEqual res, optionA
+		test.notEqual res, optionB
 
 	test.done()

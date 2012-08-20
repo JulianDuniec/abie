@@ -17,9 +17,10 @@
   };
 
   exports.abTestTwoOptions = function(test) {
-    var aCount, bCount, error, halfTestCount, i, limitHigh, limitLow, optionA, optionB, res, testCount, _i;
+    var aCount, bCount, cases, error, halfTestCount, i, limitHigh, limitLow, optionA, optionB, res, testCount, testName, _i;
     optionA = "optionA";
     optionB = "optionB";
+    testName = Math.random();
     aCount = 0;
     bCount = 0;
     testCount = 10000;
@@ -27,14 +28,15 @@
     error = 0.02 * testCount;
     limitLow = halfTestCount - error;
     limitHigh = halfTestCount + error;
+    cases = [
+      {
+        name: optionA
+      }, {
+        name: optionB
+      }
+    ];
     for (i = _i = 1; 1 <= testCount ? _i <= testCount : _i >= testCount; i = 1 <= testCount ? ++_i : --_i) {
-      res = abie.test("Name", [
-        {
-          name: optionA
-        }, {
-          name: optionB
-        }
-      ]);
+      res = abie.test(testName, cases);
       if (res === optionA) {
         ++aCount;
       } else {
@@ -49,32 +51,36 @@
   };
 
   exports.abTestDuration = function(test) {
-    var endDate, i, optionA, optionB, res, startDate, testCount, _i;
+    var cases, endDate, i, optionA, optionB, options, res, startDate, testCount, testName, _i;
     optionA = "optionA";
     optionB = "optionB";
+    testName = Math.random();
     startDate = Date.now() - 100;
     endDate = Date.now() - 50;
     testCount = 1000;
+    cases = [
+      {
+        name: optionA
+      }, {
+        name: optionB
+      }
+    ];
+    options = {
+      startDate: startDate,
+      endDate: endDate
+    };
     for (i = _i = 1; 1 <= testCount ? _i <= testCount : _i >= testCount; i = 1 <= testCount ? ++_i : --_i) {
-      res = abie.test("Name", [
-        {
-          name: optionA
-        }, {
-          name: optionB
-        }
-      ], {
-        startDate: startDate,
-        endDate: endDate
-      });
+      res = abie.test(testName, cases, options);
       test.equal(res, optionA);
     }
     return test.done();
   };
 
   exports.abTestActive = function(test) {
-    var aCount, bCount, endDate, error, halfTestCount, i, limitHigh, limitLow, optionA, optionB, res, startDate, testCount, _i;
+    var aCount, bCount, cases, endDate, error, halfTestCount, i, limitHigh, limitLow, optionA, optionB, options, res, startDate, testCount, testName, _i;
     optionA = "optionA";
     optionB = "optionB";
+    testName = "TestName";
     aCount = 0;
     bCount = 0;
     testCount = 10000;
@@ -84,17 +90,19 @@
     limitHigh = halfTestCount + error;
     startDate = new Date().setDate(new Date().getDate() - 1);
     endDate = new Date().setDate(new Date().getDate() + 1);
+    cases = [
+      {
+        name: optionA
+      }, {
+        name: optionB
+      }
+    ];
+    options = {
+      startDate: startDate,
+      endDate: endDate
+    };
     for (i = _i = 1; 1 <= testCount ? _i <= testCount : _i >= testCount; i = 1 <= testCount ? ++_i : --_i) {
-      res = abie.test("Name", [
-        {
-          name: optionA
-        }, {
-          name: optionB
-        }
-      ], {
-        startDate: startDate,
-        endDate: endDate
-      });
+      res = abie.test(testName, cases, options);
       if (res === optionA) {
         ++aCount;
       } else {
@@ -112,7 +120,7 @@
     var cases, i, optionA, optionB, options, population, res, testName, _i, _j;
     optionA = "optionA";
     optionB = "optionB";
-    testName = "TestName";
+    testName = Math.random();
     population = 10000;
     cases = [
       {
@@ -130,6 +138,70 @@
     for (i = _j = 1; 1 <= population ? _j <= population : _j >= population; i = 1 <= population ? ++_j : --_j) {
       res = abie.test(testName, cases, options);
       test.equal(res, optionA);
+    }
+    return test.done();
+  };
+
+  exports.abStickyness = function(test) {
+    var cases, followUp, i, j, optionA, optionB, options, res, testName, _i, _j;
+    optionA = "OptionA";
+    optionB = "OptionB";
+    testName = Math.random();
+    cases = [
+      {
+        name: optionA
+      }, {
+        name: optionB
+      }
+    ];
+    for (i = _i = 1; _i <= 100; i = ++_i) {
+      options = {
+        user: i
+      };
+      res = abie.test(testName, cases, options);
+      for (j = _j = 1; _j <= 100; j = ++_j) {
+        followUp = abie.test(testName, cases, options);
+        test.equal(followUp, res);
+      }
+    }
+    return test.done();
+  };
+
+  exports.abStickynessMultiple = function(test) {
+    var casesA, casesB, i, optionA, optionA1, optionB, optionB2, options, res, testNameA, testNameB, _i, _j;
+    optionA = "OptionA";
+    optionB = "OptionB";
+    optionA1 = "OptionA1";
+    optionB2 = "OptionB2";
+    testNameA = Math.random();
+    testNameB = Math.random();
+    casesA = [
+      {
+        name: optionA
+      }, {
+        name: optionB
+      }
+    ];
+    casesB = [
+      {
+        name: optionA1
+      }, {
+        name: optionB2
+      }
+    ];
+    for (i = _i = 1; _i <= 100; i = ++_i) {
+      options = {
+        user: i
+      };
+      abie.test(testNameA, casesA, options);
+    }
+    for (i = _j = 1; _j <= 100; i = ++_j) {
+      options = {
+        user: i
+      };
+      res = abie.test(testNameB, casesB, options);
+      test.notEqual(res, optionA);
+      test.notEqual(res, optionB);
     }
     return test.done();
   };
