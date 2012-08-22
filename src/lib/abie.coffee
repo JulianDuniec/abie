@@ -6,6 +6,8 @@ module.exports =
 	# Contains the test-cases by userId
 	previous : {}
 
+	goals : {}
+
 	test : (name, testCases, options) ->
 		#Ensure that we have options available
 		options = options || {}
@@ -13,7 +15,8 @@ module.exports =
 		# Stickyness - check if the user has
 		# already been subjected to the test, 
 		# and return the previous value
-		if (previous = this.getPrevious name, options) != null
+		if (options.getPrevious && ((previous = options.getPrevious options.user, name) != null)) || 
+		 	((previous = this.getPrevious name, options) != null)
 			return previous
 		
 		# Increment the population-counter for this test
@@ -31,10 +34,21 @@ module.exports =
 		res = this.getTestCase testCases
 		
 		# Persist the test-results for this specific user
-		this.setPrevious name, options, res
+		if options.setPrevious
+			options.setPrevious options.user, name, res
+		else
+			this.setPrevious name, options, res
 
 		return res
 	
+	trackGoal : (name, options) ->
+		if !this.goals[name]
+			this.goals[name] = {  cases : [] }
+		if (previous = this.getPrevious name, options) != null
+			this.goals[name].cases.push({name : previous, goals : 1})
+
+	getStats : (name) ->
+		return this.goals[name]
 
 	# The counter will keep track of the number of items left in the loop.
 	# As we go through the list, the probability will increase. 
@@ -45,7 +59,7 @@ module.exports =
 			random =  Math.random() 
 			if random < probability
 				return testCase.name
-
+				
 	ensurePrevious : (name) ->
 		if !this.previous[name]
 			this.previous[name] = {}

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "dependencies": {},
   "scripts": {
-    "test": "coffee -c -o ./ src/;nodeunit tests"
+    "test": "coffee -c -o ./bin src/;nodeunit bin/tests"
   },
   "devDependencies": {},
   "optionalDependencies": {},
@@ -11,10 +11,10 @@
     "node": "*"
   },
   "author": "Julian Duniec <julian.duniec@gmail.com> (http://duniec.se/cv/)",
-  "description": "Framework for controllers in express",
+  "description": "Framework for A/B-testing in nodejs",
   "repository": {
     "type": "git",
-    "url": "git://github.com/JulianDuniec/express-controllers.git"
+    "url": "https://github.com/JulianDuniec/abie.git"
   },
   "main": "index.js"
 }

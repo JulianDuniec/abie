@@ -131,6 +131,33 @@ exports.abStickyness = (test) ->
 
 	test.done()
 
+# Allows the consumer to add middleware for persistance of stickyness variables
+exports.stickynessPersistanceMiddleware = (test) ->
+	optionA = "OptionA"
+	optionB = "OptionB"
+	testName = Math.random()
+	cases = [{name : optionA}, {name: optionB}]
+	previous = null
+	fakePrevious = "FAKE"
+
+	setPrevious = (user, testName, value) ->
+		previous = value
+	getPrevious = (user, testName) ->
+		if previous == null
+			return previous
+		else
+			return fakePrevious
+
+	options = {user : 1, setPrevious : setPrevious, getPrevious : getPrevious}
+	res = abie.test testName, cases, options
+	test.equal previous, res, "Initial result failed"
+	for j in [1..10]
+		res = abie.test testName, cases, options
+		test.equal res, fakePrevious
+		
+
+	test.done()
+
 # Ensures that stickiness is unique to test-name, not global
 exports.abStickynessMultiple = (test) ->
 	optionA = "OptionA"
@@ -153,3 +180,19 @@ exports.abStickynessMultiple = (test) ->
 		test.notEqual res, optionB
 
 	test.done()
+
+exports.trackGoal = (test) ->
+	optionA = "optionA"
+	optionB = "optionB"
+	testName = Math.random()
+	cases = [{name : optionA}, {name: optionB}]
+	user = "Julian"
+	options = {user : user}
+	res = abie.test testName, cases, options
+	abie.trackGoal testName, options
+	stats = abie.getStats testName
+	test.equal stats.cases[0].name, res
+	test.equal stats.cases[0].goals, 1
+	test.done()
+
+

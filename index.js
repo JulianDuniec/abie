@@ -1,1 +1,1 @@
-module.exports =  require('./lib/abie');
+module.exports =  require('./bin/lib/abie');
